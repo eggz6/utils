@@ -2,8 +2,10 @@ package edx
 
 import "fmt"
 
-func Code(code uint) Err {
-	res := &entity{code: code}
+type E uint
+
+func Code(code E) Err {
+	res := &entity{code: uint(code)}
 
 	return res
 }
