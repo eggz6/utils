@@ -30,6 +30,15 @@ type Err interface {
 	Unwrap() error
 }
 
+type entity struct {
+	error
+
+	code    uint
+	label   string
+	msg     string
+	traceID string
+}
+
 func (err *entity) WithLabel(label string) Err {
 	err.label = label
 
@@ -56,15 +65,6 @@ func (err *entity) WithOrigin(e error) Err {
 
 func (err *entity) Unwrap() error {
 	return err.Origin()
-}
-
-type entity struct {
-	error
-
-	code    uint
-	label   string
-	msg     string
-	traceID string
 }
 
 func (err *entity) Origin() error {
