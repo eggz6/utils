@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -40,10 +41,10 @@ func NewHTTPClient(cli *http.Client, opts ...HTTPClientOption) *HTTPClient {
 
 // DoCtx do the req and json unmarshal the resp into ref
 // ref must be ptr
-func DoCtx(ctx context.Context, req *http.Request, resp interface{}) (*http.Response, error) {
+func DoCtx(ctx context.Context, req *http.Request, ref interface{}) (*http.Response, error) {
 	r := req.Clone(ctx)
 
-	return Do(r, resp)
+	return Do(r, ref)
 }
 
 // Do do the req and json unmarshal the resp into ref
@@ -67,6 +68,11 @@ func (h *HTTPClient) Do(req *http.Request, ref interface{}) (*http.Response, err
 		resp.Body.Close()
 		resp.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	}()
+
+	fmt.Println(ref)
+	if ref == nil {
+		return resp, nil
+	}
 
 	if defHTTPClient.Unmarshal == nil {
 		return resp, nil
