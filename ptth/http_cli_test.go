@@ -27,6 +27,51 @@ func TestUtilTestSuite(t *testing.T) {
 	suite.Run(t, new(HttpClientTestSuite))
 }
 
+func (s *HttpClientTestSuite) TestDo_Nil_Ref() {
+	req, _ := http.NewRequest("GET", "www.google.com", nil)
+	tests := []struct {
+		name      string
+		err       error
+		want      *http.Response
+		req       *http.Request
+		patch     func() *gomonkey.Patches
+		assertErr func(e error) (*Err, bool)
+	}{
+		{
+			name: "success",
+			req:  req,
+			want: &http.Response{Body: ioutil.NopCloser(bytes.NewBuffer([]byte(`{"hello":"jack"}`)))},
+			patch: func() *gomonkey.Patches {
+				res := gomonkey.NewPatches()
+				res.ApplyMethod(reflect.TypeOf(&http.Client{}), "Do", func(_ *http.Client,
+					_ *http.Request) (*http.Response, error) {
+					return &http.Response{Body: ioutil.NopCloser(bytes.NewBuffer([]byte(`{"hello":"jack"}`)))}, nil
+				})
+
+				return res
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		s.Run(tt.name, func() {
+			if tt.patch != nil {
+				res := tt.patch()
+				defer res.Reset()
+			}
+
+			resp, err := DoCtx(context.Background(), tt.req, nil)
+
+			s.Equal(tt.err, err)
+			s.Equal(tt.want, resp)
+
+			if err != nil {
+				_, ok := tt.assertErr(err)
+				s.Equal(true, ok)
+			}
+		})
+	}
+}
 func (s *HttpClientTestSuite) TestDoCtx() {
 	req, _ := http.NewRequest("GET", "www.google.com", nil)
 	tests := []struct {
