@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"net/http"
 )
@@ -69,7 +68,6 @@ func (h *HTTPClient) Do(req *http.Request, ref interface{}) (*http.Response, err
 		resp.Body = ioutil.NopCloser(bytes.NewBuffer(body))
 	}()
 
-	fmt.Println(ref)
 	if ref == nil {
 		return resp, nil
 	}
